@@ -1,14 +1,16 @@
 use cosmwasm_std::{
     log, to_binary, Api, Binary, CosmosMsg, Env, Extern, HandleResponse, HandleResult, HumanAddr,
-    InitResponse, InitResult, Querier, StdError, StdResult, Storage, Uint128, WasmMsg,
+    InitResponse, InitResult, MigrateResponse, MigrateResult, Querier, StdError, StdResult,
+    Storage, Uint128, WasmMsg,
 };
 
 use crate::msg::{
-    ConfigResponse, HandleMsg, InitMsg, LatestStageResponse, MerkleRootResponse, QueryMsg,
+    ConfigResponse, HandleMsg, InitMsg, LatestStageResponse, MerkleRootResponse, MigrateMsg,
+    QueryMsg,
 };
 use crate::state::{
-    read_claimed, read_config, read_latest_stage, read_merkle_root, store_claimed, store_config,
-    store_latest_stage, store_merkle_root, Config,
+    read_claimed, read_config, read_latest_stage, read_merkle_root, remove_claimed, store_claimed,
+    store_config, store_latest_stage, store_merkle_root, Config,
 };
 
 use cw20::Cw20HandleMsg;
@@ -254,4 +256,17 @@ pub fn query_latest_stage<S: Storage, A: Api, Q: Querier>(
     let resp = LatestStageResponse { latest_stage };
 
     Ok(resp)
+}
+
+pub fn migrate<S: Storage, A: Api, Q: Querier>(
+    deps: &mut Extern<S, A, Q>,
+    _env: Env,
+    msg: MigrateMsg,
+) -> MigrateResult {
+    for address in msg.addresses.iter() {
+        let address = deps.api.canonical_address(&address)?;
+        remove_claimed(&mut deps.storage, &address, 1);
+    }
+
+    Ok(MigrateResponse::default())
 }

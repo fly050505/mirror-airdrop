@@ -66,3 +66,9 @@ pub fn read_claimed<S: Storage>(storage: &S, user: &CanonicalAddr, stage: u8) ->
         None => Ok(false),
     }
 }
+
+pub fn remove_claimed<S: Storage>(storage: &mut S, user: &CanonicalAddr, stage: u8) {
+    let mut claim_index_bucket: Bucket<S, bool> =
+        Bucket::multilevel(&[PREFIX_CLAIM_INDEX, user.as_slice()], storage);
+    claim_index_bucket.remove(&[stage])
+}

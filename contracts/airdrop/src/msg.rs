@@ -56,3 +56,9 @@ pub struct MerkleRootResponse {
 pub struct LatestStageResponse {
     pub latest_stage: u8,
 }
+
+/// We currently take no arguments for migrations
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct MigrateMsg {
+    pub addresses: Vec<HumanAddr>,
+}
